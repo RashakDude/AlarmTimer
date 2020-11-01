@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -13,21 +14,44 @@ public class MainActivity extends AppCompatActivity {
 
     SeekBar seekBar;
     TextView textView;
+    Button button;
+    CountDownTimer countDownTimer;
+    boolean setTimer = false;
+
+    public void resetTimer() {
+        textView.setText("0:30");
+        seekBar.setProgress(30);
+        seekBar.setEnabled(true);
+        countDownTimer.cancel();
+        button.setText("GO!");
+        setTimer = false;
+    }
 
     public void buttonOnClick(View view) {
-        CountDownTimer countDownTimer = new CountDownTimer(seekBar.getProgress()*1000 + 100,1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                updateTime((int) millisUntilFinished/1000);
-            }
+        if(setTimer){
+            resetTimer();
+        }
 
-            @Override
-            public void onFinish() {
-                MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(),R.raw.alarm);
-                mediaPlayer.start();
-            }
-        }.start();
+        else {
+            seekBar.setEnabled(false);
+            button.setText("STOP");
+            setTimer = true;
+            countDownTimer = new CountDownTimer(seekBar.getProgress() * 1000 + 500, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    updateTime((int) millisUntilFinished / 1000);
+                }
+
+                @Override
+                public void onFinish() {
+                    MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.alarm);
+                    mediaPlayer.start();
+                    resetTimer();
+                }
+            }.start();
+        }
     }
+
 
     public void updateTime(int secondsLeft) {
         int min = secondsLeft/60;
@@ -45,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         seekBar = findViewById(R.id.seekBar);
         textView = findViewById(R.id.textView);
+        button = findViewById(R.id.button);
         seekBar.setMax(600);
         seekBar.setProgress(30);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
